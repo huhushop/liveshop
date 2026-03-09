@@ -13,71 +13,77 @@
         body { background: var(--bg-tea); color: var(--text); font-family: "PingFang TC", serif; margin: 0; padding-bottom: 90px; }
         
         /* 導覽分頁 */
-        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--beige); sticky; top: 0; z-index: 100; }
+        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--beige); position: sticky; top: 0; z-index: 100; }
         .tab-item { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; color: var(--soft); letter-spacing: 1px; cursor: pointer; }
         .tab-item.active { color: var(--wood); border-bottom: 2px solid var(--wood); font-weight: bold; }
 
-        /* 內容區 */
+        /* 內容區塊 */
         .section { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* 商品卡片 */
-        .product-card { background: var(--card); border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .product-card { background: var(--card); border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .product-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid var(--beige); }
         .product-info { padding: 15px; }
-        .price { color: var(--wood); font-weight: 500; margin: 5px 0 10px; }
+        .product-name { font-size: 18px; margin: 0; font-weight: 600; }
+        .price { color: var(--wood); font-weight: 500; margin: 5px 0 15px; font-size: 16px; }
         
-        /* 輸入框 */
-        .input-line { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 8px 0; outline: none; background: transparent; color: var(--text); font-size: 14px; margin-bottom: 10px; }
-        .btn { background: var(--wood); color: white; border: none; padding: 10px 20px; width: 100%; border-radius: 2px; letter-spacing: 1px; cursor: pointer; }
+        /* 輸入框與按鈕 */
+        .input-line { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 8px 0; outline: none; background: transparent; color: var(--text); font-size: 14px; margin-bottom: 15px; }
+        .btn { background: var(--wood); color: white; border: none; padding: 12px; width: 100%; border-radius: 2px; letter-spacing: 2px; cursor: pointer; font-size: 14px; }
+        .btn-outline { background: transparent; border: 1px solid var(--wood); color: var(--wood); margin-top: 10px; }
+
+        /* 購物清單樣式 */
+        .cart-item { padding: 15px 0; border-bottom: 1px solid var(--beige); display: flex; justify-content: space-between; align-items: center; }
 
         /* 底部結帳列 */
-        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.9); border-top: 1px solid var(--beige); padding: 15px 20px 30px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); border-top: 1px solid var(--beige); padding: 15px 20px 30px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
     </style>
 </head>
 <body>
 
     <div class="tabs">
         <div class="tab-item active" onclick="switchTab(event, 'view-live')">現場連線</div>
-        <div class="tab-item" onclick="switchTab(event, 'view-cart')">我的清單</div>
-        <div class="tab-item" onclick="switchTab(event, 'view-admin')">上架管理</div>
+        <div class="tab-item" onclick="switchTab(event, 'view-cart')">我的購物車</div>
+        <div class="tab-item" onclick="switchTab(event, 'view-status')">採買狀態</div>
     </div>
 
     <div id="view-live" class="section active">
-        <div id="product-list">正在加載現場好物...</div>
+        <div id="product-list">加載連線商品中...</div>
     </div>
 
     <div id="view-cart" class="section">
-        <div id="cart-container">您的清單是空的</div>
+        <h3 style="font-weight: normal; border-bottom: 1px solid var(--beige); padding-bottom: 10px;">已選購項目</h3>
+        <div id="cart-container">您的清單還是空的喔</div>
     </div>
 
-    <div id="view-admin" class="section">
-        <div style="background: white; padding: 15px; border: 1px solid var(--beige);">
-            <p style="margin-top:0">📷 拍攝照片上架</p>
-            <input type="file" id="up-file" accept="image/*" capture="camera" style="margin-bottom:15px">
-            <input type="text" id="up-name" class="input-line" placeholder="商品品名">
-            <input type="number" id="up-price" class="input-line" placeholder="價格 (NT$)">
-            <button class="btn" onclick="adminUpload()">確認上架並通知群組</button>
+    <div id="view-status" class="section">
+        <div style="background: white; padding: 25px; border: 1px solid var(--beige);">
+            <p style="color: var(--wood); font-weight: bold;">● 現場連線中 (LIVE)</p>
+            <p style="color: var(--soft);">○ 各店巡迴採買</p>
+            <p style="color: var(--soft);">○ 抵台整理配送</p>
+            <p style="color: var(--soft);">○ 包裹已寄出</p>
+            <hr style="border: 0; border-top: 1px solid var(--beige); margin: 20px 0;">
+            <small style="color: var(--soft);">HuHu 貼心提醒：現場商品流動快，喊單後請耐心等候採買結果喔！</small>
         </div>
     </div>
 
     <div class="footer">
         <div>
-            <small style="color:var(--soft)">預估合計</small>
-            <div id="total-price" style="font-weight:bold; color:var(--wood)">NT$ 0</div>
+            <small style="color:var(--soft)">預計合計</small>
+            <div id="total-price" style="font-weight:bold; color:var(--wood); font-size: 20px;">NT$ 0</div>
         </div>
-        <button class="btn" style="width:auto" onclick="checkout()">結算並發送</button>
+        <button class="btn" style="width:auto; padding: 12px 30px;" onclick="checkout()">確認結算</button>
     </div>
 
 <script>
     let myCart = [];
     const CONFIG = {
-        LIFF_ID: '你的_LIFF_ID',
+        LIFF_ID: '你的_LIFF_ID', 
         GAS_URL: '你的_GAS_部署網址'
     };
 
-    // 初始化
     async function init() {
         await liff.init({ liffId: CONFIG.LIFF_ID });
         if (!liff.isLoggedIn()) liff.login();
@@ -85,7 +91,6 @@
     }
     init();
 
-    // 切換標籤
     function switchTab(e, tabId) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -93,15 +98,73 @@
         e.currentTarget.classList.add('active');
     }
 
-    // 抓取試算表商品
+    // 從 Google 抓取商品
     async function loadProducts() {
-        const res = await fetch(CONFIG.GAS_URL);
-        const data = await res.json();
-        let html = '';
-        data.forEach(p => {
-            html += `
-                <div class="product-card">
-                    <img src="${p.img}" class="product-img">
-                    <div class="product-info">
-                        <h3>${p.name}</h3>
-                        <p class="price">NT$ ${p
+        try {
+            const res = await fetch(CONFIG.GAS_URL);
+            const data = await res.json();
+            let html = '';
+            data.forEach(p => {
+                html += `
+                    <div class="product-card">
+                        <img src="${p.img}" class="product-img">
+                        <div class="product-info">
+                            <div class="product-name">${p.name}</div>
+                            <div class="price">NT$ ${p.price}</div>
+                            <input type="text" id="note-${p.id}" class="input-line" placeholder="備註 (色號/尺寸...)">
+                            <button class="btn" onclick="addToCart('${p.name}', ${p.price}, 'note-${p.id}')">加入購物車</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('product-list').innerHTML = html || '目前暫無上架商品';
+        } catch(e) {
+            document.getElementById('product-list').innerHTML = '讀取失敗，請重新整理';
+        }
+    }
+
+    function addToCart(name, price, noteId) {
+        const note = document.getElementById(noteId).value;
+        myCart.push({ name, price, note });
+        renderCart();
+        alert('已加入購物車');
+    }
+
+    function renderCart() {
+        let total = 0;
+        let html = myCart.map((item, index) => {
+            total += item.price;
+            return `<div class="cart-item">
+                <div>
+                    <b>${item.name}</b><br>
+                    <small style="color:var(--soft)">${item.note || '無備註'}</small>
+                </div>
+                <div style="color:var(--wood)">$${item.price}</div>
+            </div>`;
+        }).join('');
+        document.getElementById('cart-container').innerHTML = html || '您的清單還是空的喔';
+        document.getElementById('total-price').innerText = `NT$ ${total}`;
+    }
+
+    async function checkout() {
+        if(myCart.length === 0) return alert('請先挑選商品');
+        const profile = await liff.getProfile();
+        
+        // 傳送到 GAS 儲存訂單
+        await fetch(CONFIG.GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'order', user: profile.displayName, items: myCart })
+        });
+
+        // 組合 LINE 訊息
+        const itemDetails = myCart.map(i => `▫️ ${i.name} (${i.note || '無備註'})`).join('\n');
+        await liff.sendMessages([{
+            type: 'text',
+            text: `🛒 【HuHuShop 下單明細】\n買家：${profile.displayName}\n──────────────\n${itemDetails}\n──────────────\n合計：${document.getElementById('total-price').innerText}\n已傳送至後台統計！`
+        }]);
+        
+        alert('結帳成功！');
+        liff.closeWindow();
+    }
+</script>
+</body>
+</html>
