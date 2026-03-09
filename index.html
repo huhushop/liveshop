@@ -17,9 +17,103 @@
         .section { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .product-card { background: var(--card); border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
+        .product-card { background: var(--card); border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .product-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid var(--beige); }
         .product-info { padding: 15px; }
         .product-name { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
         .price { color: var(--wood); font-weight: 500; margin-bottom: 15px; }
-        .input-line { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 8px 0; outline: none; background: transparent; color: var(--text); font-size: 14px; margin-bottom: 15px;
+        .input-line { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 8px 0; outline: none; background: transparent; color: var(--text); font-size: 14px; margin-bottom: 15px; }
+        .btn-buy { background: var(--wood); color: white; border: none; padding: 12px; width: 100%; border-radius: 2px; cursor: pointer; letter-spacing: 2px; font-weight: bold; }
+        .status-box { background: white; padding: 20px; border: 1px solid var(--beige); line-height: 2; }
+    </style>
+</head>
+<body>
+    <div class="tabs">
+        <div class="tab-item active" onclick="switchTab(event, 'view-live')">現場連線</div>
+        <div class="tab-item" onclick="switchTab(event, 'view-status')">採買進度</div>
+    </div>
+    <div id="view-live" class="section active"><div id="product-list">連線好物加載中...</div></div>
+    <div id="view-status" class="section">
+        <div class="status-box">
+            <p style="color: var(--wood); font-weight: bold;">● 現場連線中 (LIVE)</p>
+            <p style="color: var(--soft);">○ 各店巡迴採買</p>
+            <p style="color: var(--soft);">○ 抵台整理配送</p>
+            <p style="color: var(--soft);">○ 包裹已寄出</p>
+            <hr style="border: 0; border-top: 1px solid var(--beige); margin: 15px 0;">
+            <small style="color: var(--soft);">HuHu 提醒：點擊確認下單後即會排入採買清單，請確定要買再點唷！</small>
+        </div>
+    </div>
+
+<script>
+    const CONFIG = {
+        LIFF_ID: '2009389007-ERJXzRju', 
+        GAS_URL: 'https://script.google.com/macros/s/AKfycbxgMm1CI1K31VsYDvXFPNpeZ_VdRl8tr67DpZNzY7z_ZGtdxF0EQhM6gB-UdkWJxUAcYA/exec'
+    };
+
+    async function init() {
+        await liff.init({ liffId: CONFIG.LIFF_ID });
+        if (!liff.isLoggedIn()) liff.login();
+        loadProducts();
+    }
+    init();
+
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        e.currentTarget.classList.add('active');
+    }
+
+    async function loadProducts() {
+        try {
+            const res = await fetch(CONFIG.GAS_URL);
+            const data = await res.json();
+            let html = '';
+            data.forEach(p => {
+                html += `
+                    <div class="product-card">
+                        <img src="${p.img}" class="product-img">
+                        <div class="product-info">
+                            <div class="product-name">${p.name}</div>
+                            <div class="price">NT$ ${p.price}</div>
+                            <input type="text" id="note-${p.id}" class="input-line" placeholder="顏色/尺寸/備註...">
+                            <button class="btn-buy" id="btn-${p.id}" onclick="buyNow('${p.name}', ${p.price}, 'note-${p.id}', '${p.id}')">確認下單</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('product-list').innerHTML = html || '目前還沒有連線商品唷！';
+        } catch(e) {
+            document.getElementById('product-list').innerHTML = '讀取失敗，請重新整理';
+        }
+    }
+
+    async function buyNow(name, price, noteId, btnId) {
+        const note = document.getElementById(noteId).value;
+        const btn = document.getElementById(`btn-${btnId}`);
+        const profile = await liff.getProfile();
+        btn.innerText = "下單傳送中...";
+        btn.disabled = true;
+
+        try {
+            await fetch(CONFIG.GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'order', user: profile.displayName, itemName: name, note: note })
+            });
+            if (liff.isInClient()) {
+                await liff.sendMessages([{
+                    type: 'text',
+                    text: `🎯 【HuHuShop 下單成功】\n買家：${profile.displayName}\n品項：${name}\n備註：${note || '無'}\n──────────────\nHuHu 收到訂單囉！`
+                }]);
+            }
+            alert(`【${name}】已成功傳給 HuHu 囉！`);
+            btn.innerText = "已成功下單";
+            btn.style.background = "#A0968E";
+        } catch (e) {
+            alert('連線失敗，請再試一次');
+            btn.innerText = "確認下單";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
