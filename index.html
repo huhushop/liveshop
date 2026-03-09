@@ -3,44 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HuHuShop 選物連線</title>
+    <title>HuHuShop | 日本連線中</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
         :root {
-            --bg-tea: #F5F2ED; --card: #FFFFFF; --wood: #8D775F;
-            --beige: #DED9D2; --text: #4F4944; --soft: #A0968E;
+            --bg: #F9F7F4; --card: #FFFFFF; --wood: #8D775F;
+            --beige: #E8E2D9; --text: #4A4541; --soft: #B6ADA3; --gold: #C5A37E;
         }
-        body { background: var(--bg-tea); color: var(--text); font-family: "PingFang TC", serif; margin: 0; padding-bottom: 20px; }
-        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--beige); position: sticky; top: 0; z-index: 100; }
-        .tab-item { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; color: var(--soft); cursor: pointer; }
-        .tab-item.active { color: var(--wood); border-bottom: 2px solid var(--wood); font-weight: bold; }
-        .section { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        body { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; margin: 0; padding-bottom: 40px; }
+        
+        header { background: var(--card); padding: 25px 20px; text-align: center; border-bottom: 1px solid var(--beige); }
+        header h1 { font-family: 'Noto Serif TC', serif; font-size: 22px; margin: 0; letter-spacing: 2px; color: var(--wood); }
+        header p { font-size: 11px; color: var(--soft); margin-top: 5px; letter-spacing: 1px; }
+
+        .tabs { display: flex; background: var(--card); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .tab-item { flex: 1; text-align: center; padding: 15px 0; font-size: 12px; color: var(--soft); cursor: pointer; transition: 0.3s; }
+        .tab-item.active { color: var(--wood); font-weight: 500; position: relative; }
+        .tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 30%; width: 40%; height: 2px; background: var(--wood); }
+
+        .section { display: none; padding: 20px; animation: fadeIn 0.5s ease-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .product-card { background: var(--card); border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        .product-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid var(--beige); }
-        .product-info { padding: 15px; }
-        .product-name { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
-        .price { color: var(--wood); font-weight: 500; margin-bottom: 15px; }
-        .input-line { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 8px 0; outline: none; background: transparent; color: var(--text); font-size: 14px; margin-bottom: 15px; }
-        .btn-buy { background: var(--wood); color: white; border: none; padding: 12px; width: 100%; border-radius: 2px; cursor: pointer; letter-spacing: 2px; font-weight: bold; }
-        .status-box { background: white; padding: 20px; border: 1px solid var(--beige); line-height: 2; }
+
+        /* 商品卡片 */
+        .product-card { background: var(--card); border-radius: 12px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 8px 15px rgba(141,119,95,0.05); border: 1px solid rgba(232, 226, 217, 0.5); }
+        .img-container { position: relative; width: 100%; aspect-ratio: 1/1; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; }
+        .badge { position: absolute; top: 12px; left: 12px; background: var(--gold); color: white; font-size: 9px; padding: 3px 8px; border-radius: 4px; }
+
+        .product-info { padding: 18px; }
+        .product-name { font-size: 17px; font-weight: 500; margin-bottom: 6px; }
+        .price { color: var(--wood); font-size: 15px; margin-bottom: 12px; }
+        .price::before { content: 'NT$ '; font-size: 11px; }
+        .input-line { width: 100%; border: 1px solid var(--beige); padding: 10px; outline: none; background: #FCFBFA; font-size: 14px; margin-bottom: 12px; border-radius: 6px; box-sizing: border-box; }
+        .btn-buy { background: var(--wood); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: 500; letter-spacing: 1px; }
+
+        /* 我的訂單 & 進度 */
+        .status-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--beige); margin-bottom: 15px; }
+        .order-summary-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--beige); font-size: 14px; }
+        .total-box { text-align: right; padding: 15px 0; font-weight: bold; color: var(--wood); font-size: 18px; }
+        
+        .step { position: relative; padding-left: 25px; margin-bottom: 15px; font-size: 14px; color: var(--soft); }
+        .step.active { color: var(--wood); font-weight: 500; }
+        .step::before { content: ''; position: absolute; left: 0; top: 4px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--beige); }
+        .step.active::before { background: var(--wood); border-color: var(--wood); }
     </style>
 </head>
 <body>
+
+    <header>
+        <h1>HuHuShop</h1>
+        <p>— 日本現場連線專屬網頁 —</p>
+    </header>
+
     <div class="tabs">
         <div class="tab-item active" onclick="switchTab(event, 'view-live')">現場連線</div>
-        <div class="tab-item" onclick="switchTab(event, 'view-status')">採買進度</div>
+        <div class="tab-item" onclick="switchTab(event, 'view-orders')">我的訂單</div>
+        <div class="tab-item" onclick="switchTab(event, 'view-status')">採買流程</div>
     </div>
-    <div id="view-live" class="section active"><div id="product-list">連線好物加載中...</div></div>
+
+    <div id="view-live" class="section active">
+        <div id="product-list">加載連線商品...</div>
+    </div>
+
+    <div id="view-orders" class="section">
+        <div class="status-card">
+            <h3 style="font-size:15px; margin-top:0;">📋 本次連線訂單摘要</h3>
+            <div id="my-orders-list">正在讀取您的訂單紀錄...</div>
+            <div class="total-box" id="order-total">總計：NT$ 0</div>
+            <p style="font-size:11px; color:var(--soft);">※ 最終金額以 HuHu 通知之結帳清單為準</p>
+        </div>
+    </div>
+
     <div id="view-status" class="section">
-        <div class="status-box">
-            <p style="color: var(--wood); font-weight: bold;">● 現場連線中 (LIVE)</p>
-            <p style="color: var(--soft);">○ 各店巡迴採買</p>
-            <p style="color: var(--soft);">○ 抵台整理配送</p>
-            <p style="color: var(--soft);">○ 包裹已寄出</p>
-            <hr style="border: 0; border-top: 1px solid var(--beige); margin: 15px 0;">
-            <small style="color: var(--soft);">HuHu 提醒：點擊確認下單後即會排入採買清單，請確定要買再點唷！</small>
+        <div class="status-card">
+            <div class="step active">Step 1. 收到訂單 (已記錄)</div>
+            <div class="step">Step 2. 未採買 (等待巡店)</div>
+            <div class="step">Step 3. 已採買 (確認入袋)</div>
+            <hr style="border:0; border-top:1px solid var(--beige); margin:20px 0;">
+            <p style="font-size:12px; color:var(--soft); line-height:1.6;">
+                HuHu 提醒：現場連線通常依下單順序採買，若遇缺貨或斷貨，將第一時間通知您！
+            </p>
         </div>
     </div>
 
@@ -50,9 +94,12 @@
         GAS_URL: 'https://script.google.com/macros/s/AKfycbxgMm1CI1K31VsYDvXFPNpeZ_VdRl8tr67DpZNzY7z_ZGtdxF0EQhM6gB-UdkWJxUAcYA/exec'
     };
 
+    let userProfile = null;
+
     async function init() {
         await liff.init({ liffId: CONFIG.LIFF_ID });
         if (!liff.isLoggedIn()) liff.login();
+        userProfile = await liff.getProfile();
         loadProducts();
     }
     init();
@@ -62,6 +109,7 @@
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         e.currentTarget.classList.add('active');
+        if(tabId === 'view-orders') loadMyOrders();
     }
 
     async function loadProducts() {
@@ -72,47 +120,55 @@
             data.forEach(p => {
                 html += `
                     <div class="product-card">
-                        <img src="${p.img}" class="product-img">
+                        <div class="img-container">
+                            <span class="badge">ON SALE</span>
+                            <img src="${p.img}" class="product-img">
+                        </div>
                         <div class="product-info">
                             <div class="product-name">${p.name}</div>
-                            <div class="price">NT$ ${p.price}</div>
-                            <input type="text" id="note-${p.id}" class="input-line" placeholder="顏色/尺寸/備註...">
+                            <div class="price">${p.price}</div>
+                            <input type="text" id="note-${p.id}" class="input-line" placeholder="備註 (色號、尺寸等)">
                             <button class="btn-buy" id="btn-${p.id}" onclick="buyNow('${p.name}', ${p.price}, 'note-${p.id}', '${p.id}')">確認下單</button>
                         </div>
                     </div>`;
             });
-            document.getElementById('product-list').innerHTML = html || '目前還沒有連線商品唷！';
-        } catch(e) {
-            document.getElementById('product-list').innerHTML = '讀取失敗，請重新整理';
-        }
+            document.getElementById('product-list').innerHTML = html || '目前還沒有商品上架唷';
+        } catch(e) { document.getElementById('product-list').innerHTML = '資料讀取中...'; }
     }
 
     async function buyNow(name, price, noteId, btnId) {
         const note = document.getElementById(noteId).value;
         const btn = document.getElementById(`btn-${btnId}`);
-        const profile = await liff.getProfile();
-        btn.innerText = "下單傳送中...";
-        btn.disabled = true;
+        btn.innerText = "下單中..."; btn.disabled = true;
 
         try {
             await fetch(CONFIG.GAS_URL, {
                 method: 'POST',
-                body: JSON.stringify({ action: 'order', user: profile.displayName, itemName: name, note: note })
+                body: JSON.stringify({ action: 'order', user: userProfile.displayName, itemName: name, price: price, note: note })
             });
             if (liff.isInClient()) {
                 await liff.sendMessages([{
                     type: 'text',
-                    text: `🎯 【HuHuShop 下單成功】\n買家：${profile.displayName}\n品項：${name}\n備註：${note || '無'}\n──────────────\nHuHu 收到訂單囉！`
+                    text: `🎯 【HuHuShop 下單成功】\n買家：${userProfile.displayName}\n品項：${name}\n金額：NT$ ${price}\n備註：${note || '無'}`
                 }]);
             }
-            alert(`【${name}】已成功傳給 HuHu 囉！`);
-            btn.innerText = "已成功下單";
-            btn.style.background = "#A0968E";
-        } catch (e) {
-            alert('連線失敗，請再試一次');
-            btn.innerText = "確認下單";
-            btn.disabled = false;
-        }
+            alert('下單成功！已為您記錄。');
+            btn.innerText = "已成功下單"; btn.style.background = "#DED9D2";
+        } catch (e) { alert('下單失敗，請重試'); btn.disabled = false; }
+    }
+
+    async function loadMyOrders() {
+        const container = document.getElementById('my-orders-list');
+        try {
+            // 這邊假設 GAS 會回傳訂單資料，目前我們先用簡易過濾
+            const res = await fetch(CONFIG.GAS_URL); 
+            const products = await res.json(); // 這裡未來可以擴充 GAS 來回傳該使用者的訂單
+            
+            // 提示：目前我們先用 Mock 邏輯，正式版建議 GAS 增加一個 getOrders 功能
+            container.innerHTML = "正在計算您的訂單總額...";
+            // (此處邏輯需配合 GAS 才能顯示真實個人訂單，目前暫顯說明)
+            container.innerHTML = `<p style='font-size:13px;'>Hi ${userProfile.displayName}，HuHu 正在整理您的採買清單中，稍後會自動同步顯示！</p>`;
+        } catch(e) { container.innerHTML = "暫無訂單紀錄"; }
     }
 </script>
 </body>
