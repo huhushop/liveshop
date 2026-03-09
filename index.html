@@ -11,19 +11,15 @@
             --beige: #DED9D2; --text: #4F4944; --soft: #A0968E;
         }
         body { background: var(--bg-tea); color: var(--text); font-family: "PingFang TC", serif; margin: 0; padding-bottom: 20px; }
-        
-        /* 導覽分頁 */
         .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--beige); position: sticky; top: 0; z-index: 100; }
         .tab-item { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; color: var(--soft); cursor: pointer; }
         .tab-item.active { color: var(--wood); border-bottom: 2px solid var(--wood); font-weight: bold; }
-
         .section { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* 商品卡片 */
         .product-card { background: var(--card); border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
         .product-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid var(--beige); }
         .product-info { padding: 15px; }
         .product-name { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
-        .price { color: var(--wood); font-
+        .price { color: var(--wood); font-weight: 500; margin-bottom: 15px; }
+        .input-line { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 8px 0; outline: none; background: transparent; color: var(--text); font-size: 14px; margin-bottom: 15px;
