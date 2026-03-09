@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HuHuShop 後台管理</title>
+    <style>
+        :root { --bg: #F5F2ED; --wood: #8D775F; --beige: #DED9D2; --text: #4F4944; }
+        body { background: var(--bg); color: var(--text); font-family: "PingFang TC", sans-serif; padding: 20px; }
+        .box { background: white; padding: 20px; border: 1px solid var(--beige); border-radius: 4px; margin-bottom: 20px; }
+        h2 { font-size: 18px; color: var(--wood); border-bottom: 1px solid var(--beige); padding-bottom: 10px; }
+        input { width: 100%; border: none; border-bottom: 1px solid var(--beige); padding: 10px 0; margin-bottom: 15px; outline: none; }
+        .calc-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .calc-row input { margin-bottom: 0; }
+        .btn { background: var(--wood); color: white; border: none; padding: 12px; width: 100%; border-radius: 2px; cursor: pointer; }
+        .result-box { background: #FAF9F7; padding: 15px; text-align: center; margin-top: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h2>☕️ 售價小計算機</h2>
+    <div class="box">
+        <div class="calc-row">
+            <input type="number" id="jp-price" placeholder="日幣原價 (JPY)">
+            <input type="number" id="exchange-rate" value="0.22" step="0.001" placeholder="匯率">
+        </div>
+        <div class="calc-row">
+            <input type="number" id="profit" placeholder="想賺多少 (TWD)">
+            <input type="number" id="shipping" value="0" placeholder="運費 (TWD)">
+        </div>
+        <div class="result-box">
+            <small>建議台幣售價</small>
+            <div id="suggested-twd" style="font-size: 24px; font-weight: bold; color: var(--wood);">NT$ 0</div>
+        </div>
+        <button class="btn" style="background:#A0968E; margin-top:10px" onclick="applyToForm()">帶入下方上架表單</button>
+    </div>
+
+    <h2>📷 現場拍照上架</h2>
+    <div class="box">
+        <input type="file" id="up-file" accept="image/*" capture="camera">
+        <input type="text" id="up-name" placeholder="商品品名">
+        <input type="number" id="up-price" placeholder="最終台幣售價 (TWD)">
+        <button class="btn" id="up-btn" onclick="adminUpload()">確認上架</button>
+    </div>
+
+<script>
+    // 計算機邏輯
+    const inputs = ['jp-price', 'exchange-rate', 'profit', 'shipping'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', calculate);
+    });
+
+    function calculate() {
+        const jpy = parseFloat(document.getElementById('jp-price').value) || 0;
+        const rate = parseFloat(document.getElementById('exchange-rate').value) || 0;
+        const profit = parseFloat(document.getElementById('profit').value) || 0;
+        const ship = parseFloat(document.getElementById('shipping').value) || 0;
+        
+        const total = Math.ceil((jpy * rate) + profit + ship);
+        document.getElementById('suggested-twd').innerText = `NT$ ${total}`;
+        return total;
+    }
+
+    function applyToForm() {
+        document.getElementById('up-price').value = calculate();
+    }
+
+    // 上架邏輯 (串接你的 GAS)
+    async function adminUpload() {
+        const file = document.getElementById('up-file').files[0];
+        const name = document.getElementById('up-name').value;
+        const price = document.getElementById('up-price').value;
+        const btn = document.getElementById('up-btn');
+
+        if(!file || !name || !price) return alert('請填齊資料');
+        btn.innerText = "正在上架..."; btn.disabled = true;
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            const base64 = reader.result.split(',')[1];
+            await fetch('你的_GAS_網址', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'upload', name, price, img: base64, type: file.type })
+            });
+            alert('上架成功！');
+            location.reload();
+        };
+    }
+</script>
+</body>
+</html>
